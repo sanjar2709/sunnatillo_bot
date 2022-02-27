@@ -61,6 +61,7 @@ class SendDataButtons(models.Model):
 
 class Answers(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    question_id = models.IntegerField(null=False, blank=False)
     question = models.CharField(max_length=200, null=False, blank=False, help_text='Berilgan savol')
     answer = models.CharField(max_length=200, null=False, blank=False, help_text='Olingan javob')
 

@@ -71,7 +71,7 @@ def text_function(update, context):
             context.user_data['question_id'] = question.id
             send_question(question=question, context=context,user_id=user.id, message_id=message_id)
         else:
-            context.user_data = {}
+            context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context)
 
 def calback_function(update, context):
@@ -100,7 +100,7 @@ def calback_function(update, context):
             send_question(question=question, context=context, user_id=user.id, message_id=message_id, state=state)
         else:
             delete_message_user(context, user.id, message_id)
-            context.user_data = {}
+            context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context, message_id=message_id, state=state)
 
 
@@ -168,14 +168,22 @@ def answer_save(user_id, question_id, text=None, value=None):
     user = Users.objects.get(tg_id=user_id)
     answer = Answers()
     if text:
+        ques = Answers.objects.filter(question_id=question_id, user=user)
+        if ques:
+            ques.delete()
         question = Questions.objects.get(pk=question_id)
         answer.question = question.question
         answer.answer = text
+        answer.question_id = question_id
     elif value:
+        ques = Answers.objects.filter(question_id=question_id, user=user)
+        if ques:
+            ques.delete()
         question = Questions.objects.get(pk=question_id)
         question_value = QuestionValues.objects.get(pk=question_id)
         answer.question = question.question
         answer.answer = question_value.value
+        answer.question_id=question_id
     answer.user = user
 
     answer.save()
