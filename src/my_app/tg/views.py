@@ -38,6 +38,7 @@ def text_function(update, context):
     user = update.message.from_user
     state = context.user_data.get('state', 0)
     text = update.message.text
+    print("text", text)
     if text == '🏢 Biz haqimizda':
         send_commands(user_id=user.id, context=context, status=2)
     elif text == '🏢 Savol javob':
@@ -57,6 +58,7 @@ def text_function(update, context):
     elif state == 100:
         questions = context.user_data['questions']
         question_id = context.user_data['question_id']
+        print("answer_save javoblarni saqlaydi text function")
         answer_save(user_id=user.id, question_id=question_id, text=text)
         if user_status == 1:
             userr = Users.objects.get(tg_id=user.id)
@@ -80,11 +82,11 @@ def calback_function(update, context):
     state = context.user_data['state']
     user = update.callback_query.from_user
     data_sp = update.callback_query.data.split('_')
-
+    print("data_sp", data_sp)
     if state == 100 and data_sp[0] == 'question':
         questions = context.user_data['questions']
         question_id = context.user_data['question_id']
-
+        print("answer_save javoblarni saqlaydi query function")
         answer_save(user_id=user.id, question_id=question_id, value=int(data_sp[1]))
         if user_status == 1:
             userr = Users.objects.get(tg_id=user.id)
