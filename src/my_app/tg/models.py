@@ -1,13 +1,47 @@
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
 from django.db import models
 from . import MediaType, MessagePlase, UsersStatus, QuestionType
+
+
+def writeQuestion(instance):
+    page = DocsPage.objects.get(is_active=True)
+    scope = ['https://www.googleapis.com/auth/spreadsheets',"https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+    creads = ServiceAccountCredentials.from_json_keyfile_name('keys.json', scope)
+    client = gspread.authorize(creads)
+    docsData = client.open("Answers").worksheet(page.page.capitalize())
+
+    if docsData.cell(1, 1).value == None:
+        docsData.update_cell(1, 1, "Foydalanuvchilar/Savollar")
+
+    if instance.colum:
+        cs = instance.colum
+    else:
+        i = 1
+        while docsData.cell(1, i).value != None:
+            i = i + 1
+        cs = i
+
+    docsData.update_cell(1, cs, instance.question)
+    return cs
+
 
 class Questions(models.Model):
     question = models.TextField(null=False,blank=False, help_text='Savol matni')
     question_type = models.SmallIntegerField(choices=QuestionType.CHOICES, default=QuestionType.text, help_text='Savol turi')
     is_active = models.BooleanField(default=False, null=False, blank=False, help_text="Buni belgilasayiz savol foydalanuvchiga boradi")
+    colum = models.IntegerField(null=True, blank=True)
+
+
+    def save(self, *args, **kwargs):
+        if self.is_active:
+            self.colum = writeQuestion(self)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.question
+
 
     class Meta:
         verbose_name = 'Savollar'
@@ -18,9 +52,6 @@ class QuestionValues(models.Model):
 
     def __str__(self):
         return self.value
-
-    class Meta:
-        verbose_name = 'Savolning javoblari'
 
 
 class Users(models.Model):
@@ -70,3 +101,20 @@ class Answers(models.Model):
 
     class Meta:
         verbose_name = 'Foydalanuvchilar javoblari'
+
+class DocsPage(models.Model):
+    page = models.CharField(max_length=40, null=False, blank=False, help_text="Google docsdagi page nomi")
+    is_active = models.BooleanField(default=False, null=False, blank=False)
+
+    def __str__(self):
+        return self.page
+
+    class Meta:
+        verbose_name = 'Docs page'
+
+class DocsKeys(models.Model):
+    keys = models.JSONField(null=False, blank=False, default={}, help_text="Bu googda yani accaunt ochilganda beriladigan keyslar")
+    is_active = models.BooleanField(default=False, null=False, blank=False)
+
+    class Meta:
+        verbose_name = 'Docs Keys'

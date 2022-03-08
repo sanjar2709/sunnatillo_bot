@@ -8,7 +8,6 @@ from ...views import start, text_function, calback_function
 
 class Command(BaseCommand):
     help = 'Companiya bot'
-    print("settings.TOKEN_KEY",settings.TOKEN_KEY)
     def handle(self, *args, **options):
         q = mq.MessageQueue(all_burst_limit=3, all_time_limit_ms=3000)
         request = Request(con_pool_size=36)
@@ -18,7 +17,6 @@ class Command(BaseCommand):
 
         dispatcher = updater.dispatcher
 
-        # on different commands - answer in Telegram
         dispatcher.add_handler(CommandHandler("start", start))
         dispatcher.add_handler(MessageHandler(Filters.text,text_function))
         dispatcher.add_handler(CallbackQueryHandler(calback_function))

@@ -1,9 +1,5 @@
 from django.contrib import admin
-from .models import SendData, SendDataButtons, Users, Questions, QuestionValues, Answers
-
-class AnswerAdmin(admin.StackedInline):
-    model = Answers
-    extra = 1
+from .models import SendData, SendDataButtons, Users, Questions, QuestionValues, Answers, DocsPage, DocsKeys
 
 class SendDataButtonsAdmin(admin.StackedInline):
     model = SendDataButtons
@@ -13,7 +9,6 @@ class SendDataAdmin(admin.ModelAdmin):
     inlines = [SendDataButtonsAdmin]
 
 class UsersAdmin(admin.ModelAdmin):
-    inlines = [AnswerAdmin]
     list_display = ('tg_id', 'tg_firstname', 'user_status')
 
 class QuestionValuesAdmin(admin.StackedInline):
@@ -27,4 +22,5 @@ class QuestionAdmin(admin.ModelAdmin):
 admin.site.register(SendData, SendDataAdmin)
 admin.site.register(Questions, QuestionAdmin)
 admin.site.register(Users, UsersAdmin)
-admin.site.register(Answers)
+admin.site.register(DocsPage)
+admin.site.register(DocsKeys)

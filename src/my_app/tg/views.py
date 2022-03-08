@@ -1,6 +1,9 @@
+import gspread
+import json
+from oauth2client.service_account import ServiceAccountCredentials
 from django.shortcuts import render
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
-from .models import SendData, SendDataButtons, Users, Questions, QuestionValues, Answers
+from .models import SendData, SendDataButtons, Users, Questions, QuestionValues, Answers, DocsPage, DocsKeys
 # -----------------------------sends function
 def go_message(context,user_id, message, reply_murkup):
     context.bot.send_message(chat_id=user_id, text=message,reply_markup=reply_murkup, parse_mode='HTML',
@@ -25,20 +28,23 @@ def start(update, context):
     except:
         user = user_save(user_data)
 
-    buttons = [['🏢 Savol javob', '🏢 Biz haqimizda']]
+    buttons = ReplyKeyboardMarkup([['🏢 Savol javob', '🏢 Biz haqimizda']], one_time_keyboard=True, resize_keyboard=True)
+
     text = f"""Assalomu aleykum <b>{user.tg_firstname}</b>"""
-    go_message(context, user.tg_id, text, None)
+    go_message(context, user.tg_id, text, buttons)
     send_commands(user_id=user.tg_id, status=1, context=context)
 
 
 
 def text_function(update, context):
+    context_data = context.user_data.get('dataa', [])
+
     user_status = context.user_data.get('user_status', 1)
     message_id = update.message.message_id
     user = update.message.from_user
     state = context.user_data.get('state', 0)
     text = update.message.text
-    print("text", text)
+
     if text == '🏢 Biz haqimizda':
         send_commands(user_id=user.id, context=context, status=2)
     elif text == '🏢 Savol javob':
@@ -58,8 +64,10 @@ def text_function(update, context):
     elif state == 100:
         questions = context.user_data['questions']
         question_id = context.user_data['question_id']
-        print("answer_save javoblarni saqlaydi text function")
-        answer_save(user_id=user.id, question_id=question_id, text=text)
+
+        context_data.append({ "user_id":user.id, "question_id":question_id, "text":text})
+        context.user_data['dataa'] = context_data
+
         if user_status == 1:
             userr = Users.objects.get(tg_id=user.id)
             userr.user_status = 2
@@ -75,19 +83,23 @@ def text_function(update, context):
         else:
             context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context)
+            answer_save(context=context, user_id=user.id)
 
 def calback_function(update, context):
+    context_data = context.user_data.get('dataa', [])
     user_status = context.user_data.get('user_status', 1)
+
     message_id = update.callback_query.message.message_id
     state = context.user_data['state']
     user = update.callback_query.from_user
     data_sp = update.callback_query.data.split('_')
-    print("data_sp", data_sp)
+
     if state == 100 and data_sp[0] == 'question':
         questions = context.user_data['questions']
         question_id = context.user_data['question_id']
-        print("answer_save javoblarni saqlaydi query function")
-        answer_save(user_id=user.id, question_id=question_id, value=int(data_sp[1]))
+
+        context_data.append({"user_id":user.id, "question_id":question_id, "value":int(data_sp[1])})
+        context.user_data['dataa'] = context_data
         if user_status == 1:
             userr = Users.objects.get(tg_id=user.id)
             userr.user_status = 2
@@ -103,7 +115,8 @@ def calback_function(update, context):
         else:
             delete_message_user(context, user.id, message_id)
             context.user_data['state'] = 0
-            send_commands(user_id=user.id, status=3, context=context, message_id=message_id, state=state)
+            send_commands(user_id=user.id, status=3, context=context)
+            answer_save(context=context, user_id=user.id)
 
 
 def send_question(question, context, user_id, message_id, state=None):
@@ -166,26 +179,47 @@ def user_save(user_data):
     user.save()
     return user
 
-def answer_save(user_id, question_id, text=None, value=None):
-    user = Users.objects.get(tg_id=user_id)
-    answer = Answers()
-    if text:
-        ques = Answers.objects.filter(question_id=question_id, user=user)
-        if ques:
-            ques.delete()
-        question = Questions.objects.get(pk=question_id)
-        answer.question = question.question
-        answer.answer = text
-        answer.question_id = question_id
-    elif value:
-        ques = Answers.objects.filter(question_id=question_id, user=user)
-        if ques:
-            ques.delete()
-        question = Questions.objects.get(pk=question_id)
-        question_value = QuestionValues.objects.get(pk=question_id)
-        answer.question = question.question
-        answer.answer = question_value.value
-        answer.question_id=question_id
-    answer.user = user
+def answer_save(context, user_id):
+    question_values = context.user_data.get('dataa', [])
+    for quest in question_values:
+        text = quest.get('text', None)
+        value = quest.get('value', None)
+        question_id = quest.get('question_id')
+        user_id = quest.get("user_id")
 
-    answer.save()
+        user = Users.objects.get(tg_id=user_id)
+        question = Questions.objects.get(pk=question_id)
+
+        if text:
+            AnswerSaved(context=context,user_id=user_id, value=text, colum=question.colum)
+        elif value:
+            question_value = QuestionValues.objects.get(pk=value)
+            AnswerSaved(context=context,user_id=user_id, value=question_value.value, colum=question.colum)
+
+def AnswerSaved(context, user_id, value, colum):
+    colum_answer = context.user_data.get('colum', None)
+
+    page = DocsPage.objects.get(is_active=True)
+    keys = DocsKeys.objects.get(is_active=True)
+
+    json_string = json.dumps(keys.keys)
+    with open('keys.json', 'w') as outfile:
+        outfile.write(json_string)
+
+    scope = ['https://www.googleapis.com/auth/spreadsheets', "https://www.googleapis.com/auth/drive.file",
+             "https://www.googleapis.com/auth/drive"]
+    creads = ServiceAccountCredentials.from_json_keyfile_name('keys.json', scope)
+    client = gspread.authorize(creads)
+    docsData = client.open("Answers").worksheet(page.page.capitalize())
+
+    if not colum_answer:
+        i = 1
+        while docsData.cell(i,1).value != None:
+            i = i + 1
+        context.user_data['colum'] = i
+
+        docsData.update_cell(i, 1, f"tg_id=>{user_id}")
+        docsData.update_cell(i, colum, value)
+    else:
+        docsData.update_cell(colum_answer, colum, value)
+
