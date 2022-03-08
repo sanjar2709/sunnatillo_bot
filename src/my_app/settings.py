@@ -125,4 +125,4 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-TOKEN_KEY = '1769249243:AAHDyKX-QmuITwSxKqtbqpNtB0sVSu_dzaY'
+TOKEN_KEY = '5266823117:AAGja75DQupLFrJNDi_-SVkCiBwQ1sAl5nQ'
