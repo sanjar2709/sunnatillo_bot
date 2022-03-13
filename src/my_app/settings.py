@@ -10,20 +10,30 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
+import ast
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+def get_bool_from_env(name, default_value):
+    if name in os.environ:
+        value = os.environ[name]
+        try:
+            return ast.literal_eval(value)
+        except ValueError as e:
+            raise ValueError("{} is an invalid value for {}".format(value, name)) from e
+    return default_value
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(e*^%#w1ii-frd7bm46*hi+!2kibx99-+oj$%gh@!(s)m@cw-0'
-
+SECRET_KEY = os.getenv("SECRET_KEY", "1*2")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_bool_from_env("DEBUG", True)
 
 ALLOWED_HOSTS = []
 
@@ -73,11 +83,15 @@ WSGI_APPLICATION = 'my_app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
+print(os.getenv("DB_NAME", "env none"),)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv("DB_NAME", "question_db"),
+        "USER": os.getenv("DB_USER", "question_user"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "question_root"),
+        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
+        "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
 
@@ -125,4 +139,4 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-TOKEN_KEY = '5266823117:AAGja75DQupLFrJNDi_-SVkCiBwQ1sAl5nQ'
+TOKEN_KEY = os.getenv("TOKEN_KEY", "5266823117:AAGja75DQupLFrJNDi_-SVkCiBwQ1sAl5nQ")
