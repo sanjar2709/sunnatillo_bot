@@ -136,4 +136,4 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-TOKEN_KEY = os.getenv("TOKEN_KEY", "1769249243:AAHDyKX-QmuITwSxKqtbqpNtB0sVSu_dzaY")
+TOKEN_KEY = os.getenv("TOKEN_KEY", "5107703706:AAH-vmaEt9Gw-0Dlcw4nIO8SFpBEAAM6LvM")
