@@ -60,7 +60,7 @@ def text_function(update, context):
             context.user_data['question_id'] = question.id
             send_question(question=question, context=context, user_id=user.id, message_id=message_id)
         else:
-            go_message(context=context, user_id=user.id, message='Hozircha savollar yoq ❌')
+            go_message(context=context, user_id=user.id, message='Hozircha savollar yoq ❌', reply_murkup=None)
     elif state == 100:
         questions = context.user_data['questions']
         question_id = context.user_data['question_id']
