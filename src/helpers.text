@@ -1,0 +1,3 @@
+DB:
+     CREATE USER ques_user WITH PASSWORD 'ques_root';
+     CREATE DATABASE ques_db OWNER ques_user;
