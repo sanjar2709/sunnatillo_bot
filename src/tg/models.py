@@ -113,7 +113,7 @@ class DocsPage(models.Model):
         verbose_name = 'Docs page'
 
 class DocsKeys(models.Model):
-    keys = models.JSONField(null=False, blank=False, default={}, help_text="Bu googda yani accaunt ochilganda beriladigan keyslar")
+    keys = models.JSONField(null=False, blank=False, help_text="Bu googda yani accaunt ochilganda beriladigan keyslar")
     is_active = models.BooleanField(default=False, null=False, blank=False)
 
     class Meta:
