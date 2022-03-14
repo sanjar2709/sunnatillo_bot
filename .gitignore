@@ -17,7 +17,6 @@ pip-selfcheck.json
 __pycache__/
 *.py[cod]
 
-*.sqlite3
 pyvenv.cfg
 
 # C extensions
