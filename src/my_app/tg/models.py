@@ -1,6 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
+import json
 from django.db import models
 from . import MediaType, MessagePlase, UsersStatus, QuestionType
 
@@ -123,6 +123,11 @@ class DocsPage(models.Model):
 class DocsKeys(models.Model):
     keys = models.JSONField(null=False, blank=False, default={},help_text="Bu googda yani accaunt ochilganda beriladigan keyslar")
     is_active = models.BooleanField(default=False, null=False, blank=False)
+
+    def save(self):
+        if self.is_active:
+            with open('keys.json', 'w') as outfile:
+                outfile.write(json.dumps(self.keys))
 
     class Meta:
         verbose_name_plural  = 'Docs Keys'
