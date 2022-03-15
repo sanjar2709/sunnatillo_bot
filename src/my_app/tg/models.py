@@ -4,6 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from django.db import models
 from . import MediaType, MessagePlase, UsersStatus, QuestionType
 
+from django.contrib.auth.models import User
 
 def writeQuestion(instance):
     page = DocsPage.objects.get(is_active=True)
@@ -27,6 +28,13 @@ def writeQuestion(instance):
     return cs
 
 
+class CustomUser(User):
+    class Meta:
+        proxy = True
+        app_label = 'auth'
+        verbose_name = 'Admin'
+
+
 class Questions(models.Model):
     question = models.TextField(null=False,blank=False, help_text='Savol matni')
     question_type = models.SmallIntegerField(choices=QuestionType.CHOICES, default=QuestionType.text, help_text='Savol turi')
@@ -44,7 +52,7 @@ class Questions(models.Model):
 
 
     class Meta:
-        verbose_name = 'Savollar'
+        verbose_name_plural  = 'Questions'
 
 class QuestionValues(models.Model):
     question = models.ForeignKey(Questions, on_delete=models.CASCADE)
@@ -66,7 +74,7 @@ class Users(models.Model):
         return self.tg_firstname if self.tg_firstname else str(self.tg_id)
 
     class Meta:
-        verbose_name = 'Foydalanuvchilar'
+        verbose_name_plural  = 'Users'
 
 class SendData(models.Model):
     title = models.CharField(max_length=200, blank=False, null=False,help_text="Bu botga chiqmaydi shunchaki o'zingiz uchun")
@@ -80,7 +88,7 @@ class SendData(models.Model):
         return self.title
 
     class Meta:
-        verbose_name = 'Kommandalardan keyin chiqadigan malumotlar'
+        verbose_name_plural  = 'Other texts'
 
 class SendDataButtons(models.Model):
     send_data = models.ForeignKey(SendData, on_delete=models.CASCADE)
@@ -100,7 +108,7 @@ class Answers(models.Model):
         return self.question
 
     class Meta:
-        verbose_name = 'Foydalanuvchilar javoblari'
+        verbose_name_plural  = 'Foydalanuvchilar javoblari'
 
 class DocsPage(models.Model):
     page = models.CharField(max_length=40, null=False, blank=False, help_text="Google docsdagi page nomi")
@@ -110,11 +118,11 @@ class DocsPage(models.Model):
         return self.page
 
     class Meta:
-        verbose_name = 'Docs page'
+        verbose_name_plural  = 'Docs page'
 
 class DocsKeys(models.Model):
     keys = models.JSONField(null=False, blank=False, default={},help_text="Bu googda yani accaunt ochilganda beriladigan keyslar")
     is_active = models.BooleanField(default=False, null=False, blank=False)
 
     class Meta:
-        verbose_name = 'Docs Keys'
+        verbose_name_plural  = 'Docs Keys'

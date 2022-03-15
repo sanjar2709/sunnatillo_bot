@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import SendData, SendDataButtons, Users, Questions, QuestionValues, Answers, DocsPage, DocsKeys
+from .models import SendData, SendDataButtons, Users, Questions, QuestionValues, Answers, DocsPage, DocsKeys,CustomUser
+
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+
 
 class SendDataButtonsAdmin(admin.StackedInline):
     model = SendDataButtons
@@ -24,3 +28,6 @@ admin.site.register(Questions, QuestionAdmin)
 admin.site.register(Users, UsersAdmin)
 admin.site.register(DocsPage)
 admin.site.register(DocsKeys)
+
+admin.site.unregister(User)
+admin.site.register(CustomUser, UserAdmin)
