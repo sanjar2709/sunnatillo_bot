@@ -84,13 +84,15 @@ def text_function(update, context):
             context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context)
             answer_save(context=context, user_id=user.id)
+    else:
+        send_commands(user_id=user.id, status=1, context=context)
 
 def calback_function(update, context):
     context_data = context.user_data.get('dataa', [])
     user_status = context.user_data.get('user_status', 1)
 
     message_id = update.callback_query.message.message_id
-    state = context.user_data['state']
+    state = context.user_data.get('state',0)
     user = update.callback_query.from_user
     data_sp = update.callback_query.data.split('_')
 
@@ -117,6 +119,8 @@ def calback_function(update, context):
             context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context)
             answer_save(context=context, user_id=user.id)
+    else:
+        send_commands(user_id=user.id, status=1, context=context)
 
 
 def send_question(question, context, user_id, message_id, state=None):
