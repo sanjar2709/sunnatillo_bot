@@ -210,12 +210,8 @@ def answer_save(context, user_id):
 def AnswerSaved(context, user_id, value, colum):
     colum_answer = context.user_data.get('colum', None)
 
-    page = DocsPage.objects.get(is_active=True)
-    keys = DocsKeys.objects.get(is_active=True)
-
-    json_string = json.dumps(keys.keys)
-    with open('keys.json', 'w') as outfile:
-        outfile.write(json_string)
+    page = DocsPage.objects.filter(is_active=True).first()
+    keys = DocsKeys.objects.filter(is_active=True).first()
 
     scope = ['https://www.googleapis.com/auth/spreadsheets', "https://www.googleapis.com/auth/drive.file",
              "https://www.googleapis.com/auth/drive"]
