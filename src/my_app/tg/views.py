@@ -26,13 +26,13 @@ def start(update, context):
     try:
         user = Users.objects.get(tg_id=user_data.id)
     except:
-        user = user_save(user_data)
+        user = user_save_data(user_data)
 
     buttons = ReplyKeyboardMarkup([['🏢 Savol javob', '🏢 Biz haqimizda']], one_time_keyboard=True, resize_keyboard=True)
 
-    text = f"""Assalomu aleykum <b>{user.tg_firstname}</b>"""
-    go_message(context, user.tg_id, text, buttons)
-    send_commands(user_id=user.tg_id, status=1, context=context)
+    text = f"""Assalomu aleykum <b>{user_data.first_name}</b>"""
+    go_message(context, user_data.id, text, buttons)
+    send_commands(user_id=user_data.id, status=1, context=context)
 
 
 
@@ -164,21 +164,28 @@ def send_commands(user_id, status, context):
     else:
         go_message(context=context,user_id=user_id,message="Bazaga malumot kiritish kerak", reply_murkup=None)
 
-def user_save(user_data):
+def user_save_data(user_data):
     user = Users()
     user.tg_id = user_data.id
     try:
         user.phone_number = user_data.phone_number
     except:
-        pass
+        user.phone_number = ''
+
+    try:
+        user.tg_username = user_data.username
+    except:
+        user.tg_username = ''
+
     try:
         user.tg_firstname = user_data.first_name
     except:
-        pass
+        user.tg_firstname = ''
+
     try:
         user.tg_lastname = user_data.lastname
     except:
-        pass
+        user.tg_lastname = ''
 
     user.save()
     return user

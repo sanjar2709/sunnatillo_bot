@@ -63,7 +63,7 @@ class QuestionValues(models.Model):
 
 
 class Users(models.Model):
-    tg_id = models.IntegerField(null=False, blank=False)
+    tg_id = models.BigIntegerField(null=False, blank=False)
     tg_username = models.CharField(max_length=150, null=True, blank=True)
     phone_number = models.CharField(max_length=30, null=True, blank=True)
     tg_firstname = models.CharField(max_length=150, null=True, blank=True)
