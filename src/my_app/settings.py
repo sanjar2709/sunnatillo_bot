@@ -87,9 +87,9 @@ print("db_name", os.getenv("DB_NAME"))
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("DB_NAME", "ques_db"),
-        "USER": os.getenv("DB_USER", "ques_user"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "ques_root"),
+        "NAME": os.getenv("myproject", "myproject"),
+        "USER": os.getenv("myprojectuser", "myprojectuser"),
+        "PASSWORD": os.getenv("password", "password"),
         "HOST": os.getenv("DB_HOST", "127.0.0.1"),
         "PORT": os.getenv("DB_PORT", "5432"),
     },
