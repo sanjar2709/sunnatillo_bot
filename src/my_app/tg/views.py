@@ -83,7 +83,7 @@ def text_function(update, context):
         else:
             context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context)
-            answer_save(context=context, user_id=user.id)
+            AnswerSaved(context=context, user_id=user.id)
     else:
         send_commands(user_id=user.id, status=1, context=context)
 
@@ -118,7 +118,7 @@ def calback_function(update, context):
             delete_message_user(context, user.id, message_id)
             context.user_data['state'] = 0
             send_commands(user_id=user.id, status=3, context=context)
-            answer_save(context=context, user_id=user.id)
+            AnswerSaved(context=context, user_id=user.id)
     else:
         send_commands(user_id=user.id, status=1, context=context)
 
@@ -190,25 +190,10 @@ def user_save_data(user_data):
     user.save()
     return user
 
-def answer_save(context, user_id):
+
+
+def AnswerSaved(context, user_id):
     question_values = context.user_data.get('dataa', [])
-    for quest in question_values:
-        text = quest.get('text', None)
-        value = quest.get('value', None)
-        question_id = quest.get('question_id')
-        user_id = quest.get("user_id")
-
-        user = Users.objects.get(tg_id=user_id)
-        question = Questions.objects.get(pk=question_id)
-
-        if text:
-            AnswerSaved(context=context,user_id=user_id, value=text, colum=question.colum)
-        elif value:
-            question_value = QuestionValues.objects.get(pk=value)
-            AnswerSaved(context=context,user_id=user_id, value=question_value.value, colum=question.colum)
-
-def AnswerSaved(context, user_id, value, colum):
-    colum_answer = context.user_data.get('colum', None)
 
     page = DocsPage.objects.filter(is_active=True).first()
     keys = DocsKeys.objects.filter(is_active=True).first()
@@ -219,15 +204,38 @@ def AnswerSaved(context, user_id, value, colum):
     client = gspread.authorize(creads)
     docsData = client.open("Answers").worksheet(page.page.capitalize())
 
-    if not colum_answer:
-        i = 1
-        while docsData.cell(i,1).value != None:
-            i = i + 1
-        context.user_data['colum'] = i
+    for data in question_values:
+        colum_answer = context.user_data.get('colum', None)
+        value_column = answer_save(data)
+        value = value_column[0]
+        colum = value_column[1]
+        if not colum_answer:
+            i = 1
+            while docsData.cell(i,1).value != None:
+                i = i + 1
+            context.user_data['colum'] = i
 
-        docsData.update_cell(i, 1, f"tg_id=>{user_id}")
-        docsData.update_cell(i, colum, value)
-    else:
-        docsData.update_cell(colum_answer, colum, value)
+            docsData.update_cell(i, 1, f"tg_id=>{user_id}")
+            docsData.update_cell(i, colum, value)
+        else:
+            docsData.update_cell(colum_answer, colum, value)
 
 
+def answer_save(quest):
+
+    text = quest.get('text', None)
+    value = quest.get('value', None)
+    question_id = quest.get('question_id')
+
+    question = Questions.objects.get(pk=question_id)
+
+    valu = ''
+    column = 0
+    if text:
+        valu = text
+        column = question.colum
+    elif value:
+        question_value = QuestionValues.objects.get(pk=value)
+        valu = question_value.value
+        column = question.colum
+    return [valu,column]
