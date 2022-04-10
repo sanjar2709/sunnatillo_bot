@@ -40,7 +40,7 @@ class Questions(models.Model):
     question_type = models.SmallIntegerField(choices=QuestionType.CHOICES, default=QuestionType.text, help_text='Savol turi')
     is_active = models.BooleanField(default=False, null=False, blank=False, help_text="Buni belgilasayiz savol foydalanuvchiga boradi")
     colum = models.IntegerField(null=True, blank=True)
-
+    sort = models.IntegerField(null=True,blank=True,default=0, help_text="Bu savol nechanchi o'rinda chiqishini belgilaydi")
 
     def save(self, *args, **kwargs):
         if self.is_active:

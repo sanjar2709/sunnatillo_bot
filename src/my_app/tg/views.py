@@ -49,7 +49,7 @@ def text_function(update, context):
         send_commands(user_id=user.id, context=context, status=2)
     elif text == '🏢 Savol javob':
         context.user_data['state'] = 100
-        questions = Questions.objects.filter(is_active=True)
+        questions = Questions.objects.filter(is_active=True).order_by('sort')
         data = []
         for ques in questions:
             data.append(ques)
@@ -203,24 +203,63 @@ def AnswerSaved(context, user_id):
     creads = ServiceAccountCredentials.from_json_keyfile_name('keys.json', scope)
     client = gspread.authorize(creads)
     docsData = client.open("Answers").worksheet(page.page.capitalize())
+    ALPHA = {
+        1: 'A',
+        2: 'B',
+        3: 'C',
+        4: 'D',
+        5: 'E',
+        6: 'F',
+        7: 'G',
+        8: 'H',
+        9: 'I',
+        10: 'J',
+        11: 'K',
+        12: 'L',
+        13: 'M',
+        14: 'N',
+        15: 'O',
+        16: 'P',
+        17: 'Q',
+        18: 'R',
+        19: 'S',
+        20: 'T',
+        21: 'U',
+        22: 'V',
+        23: 'W',
+        24: 'X',
+        25: 'Y',
+        26: 'Z'
+    }
+    num = 1
+    while docsData.cell(num, 1).value != None:
+        num = num + 1
 
-    for data in question_values:
-        colum_answer = context.user_data.get('colum', None)
+    cell_list = docsData.range(f"A{num}:{ALPHA[len(question_values)+1]}{num}")
+
+    for i, data in enumerate(question_values):
+        # colum_answer = context.user_data.get('colum', None)
         value_column = answer_save(data)
         value = value_column[0]
         colum = value_column[1]
-        if not colum_answer:
-            i = 1
-            while docsData.cell(i,1).value != None:
-                i = i + 1
-            context.user_data['colum'] = i
-
-            docsData.update_cell(i, 1, f"tg_id=>{user_id}")
-            docsData.update_cell(i, colum, value)
+        if i == 0:
+            cell_list[i].value = f"tg_id=>{user_id}"
+            cell_list[int(colum) - 1].value = value
         else:
+            cell_list[int(colum) - 1].value = value
 
-            docsData.update_cell(colum_answer, colum, value)
-
+    docsData.update_cells(cell_list)
+        # if not colum_answer:
+        #     i = 1
+        #     while docsData.cell(i,1).value != None:
+        #         i = i + 1
+        #     context.user_data['colum'] = i
+        #
+        #     docsData.update_cell(i, 1, f"tg_id=>{user_id}")
+        #     docsData.update_cell(i, colum, value)
+        # else:
+        #     docsData.update_cells()
+        #     docsData.update_cell(colum_answer, colum, value)
 
 def answer_save(quest):
 
