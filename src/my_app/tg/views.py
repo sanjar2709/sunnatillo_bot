@@ -22,6 +22,7 @@ def delete_message_user(context,user_id, message_id):
     context.bot.delete_message(chat_id=user_id, message_id=message_id)
 
 def start(update, context):
+    context.user_data['dataa'] =  []
     user_data = update.message.from_user
     try:
         user = Users.objects.get(tg_id=user_data.id)
@@ -235,6 +236,8 @@ def AnswerSaved(context, user_id):
     while docsData.cell(num, 1).value != None:
         num = num + 1
 
+    print("question_values",len(question_values),question_values )
+
     cell_list = docsData.range(f"A{num}:{ALPHA[len(question_values)+1]}{num}")
 
     for i, data in enumerate(question_values):
@@ -247,7 +250,7 @@ def AnswerSaved(context, user_id):
             cell_list[int(colum) - 1].value = value
         else:
             cell_list[int(colum) - 1].value = value
-
+    context.user_data['dataa'] = []
     docsData.update_cells(cell_list)
         # if not colum_answer:
         #     i = 1
